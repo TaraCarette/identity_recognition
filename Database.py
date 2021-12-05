@@ -11,18 +11,22 @@ def initialize_database(conn):
         conn.execute("CREATE TABLE faces (user_id INTEGER PRIMARY KEY NOT NULL, face_ref VARCHAR(400) NOT NULL, preference INTEGER);")
         conn.commit()
 
-def get_similar_faces(conn):
+def get_similar_face(conn):
 
     return
 
 def add_new_face(conn, face_data, preference):
     conn.execute("INSERT INTO faces(user_id, face_ref, preference) VALUES({},{},{})".format('NULL', face_data, preference))
     conn.commit()
+    return conn.execute("SELECT user_id FROM faces WHERE faces.face_ref == {} AND faces.preference == {}").format(face_data, preference).fetchone()
 
 def get_user_preference(conn, user_id):
     result = conn.execute("SELECT preference FROM faces WHERE faces.user_id == {}".format(user_id)).fetchone()
     return result
 
+def set_user_preference(conn, user_id, preference):
+    conn.execute("UPDATE faces SET faces.preference = {} WHERE user_id == {}".format(preference, user_id))
+    conn.commit()
 
 if __name__ == '__main__':
     conn = connect_to_database()
