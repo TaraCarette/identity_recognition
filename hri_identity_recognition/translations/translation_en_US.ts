@@ -9,10 +9,9 @@
             <translation type="vanished">Hello</translation>
         </message>
         <message>
-            <location filename="behavior_1/behavior.xar" line="0"/>
             <source>Learning is fun</source>
             <comment>Text</comment>
-            <translation type="unfinished">Learning is fun</translation>
+            <translation type="obsolete">Learning is fun</translation>
         </message>
     </context>
     <context>
@@ -28,10 +27,9 @@
             <translation type="obsolete">It's Tara</translation>
         </message>
         <message>
-            <location filename="behavior_1/behavior.xar" line="0"/>
             <source>Bummer</source>
             <comment>Text</comment>
-            <translation type="unfinished">Bummer</translation>
+            <translation type="obsolete">Bummer</translation>
         </message>
     </context>
     <context>
@@ -42,10 +40,41 @@
             <translation type="vanished">Hello</translation>
         </message>
         <message>
-            <location filename="behavior_1/behavior.xar" line="0"/>
             <source>Detected</source>
             <comment>Text</comment>
-            <translation type="unfinished">Detected</translation>
+            <translation type="obsolete">Detected</translation>
+        </message>
+    </context>
+    <context>
+        <name>behavior_1/behavior.xar:/learnFace/Say</name>
+        <message>
+            <source>Nice to meet you!</source>
+            <comment>Text</comment>
+            <translation type="obsolete">Nice to meet you!</translation>
+        </message>
+    </context>
+    <context>
+        <name>behavior_1/behavior.xar:/learnFace/Say (1)</name>
+        <message>
+            <source>Bummer</source>
+            <comment>Text</comment>
+            <translation type="obsolete">Bummer</translation>
+        </message>
+    </context>
+    <context>
+        <name>learnFace/behavior.xar:/Say</name>
+        <message>
+            <source>Nice to meet you!</source>
+            <comment>Text</comment>
+            <translation type="obsolete">Nice to meet you!</translation>
+        </message>
+    </context>
+    <context>
+        <name>learnFace/behavior.xar:/Say (1)</name>
+        <message>
+            <source>Bummer</source>
+            <comment>Text</comment>
+            <translation type="obsolete">Bummer</translation>
         </message>
     </context>
 </TS>
