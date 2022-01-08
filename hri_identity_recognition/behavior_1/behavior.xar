@@ -113,11 +113,12 @@
               <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
               <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
               <Output name="identity_id" type="3" type_size="1" nature="2" inner="0" tooltip="" id="5" />
+              <Output name="failed" type="1" type_size="1" nature="2" inner="0" tooltip="" id="6" />
               <Timeline enable="0">
                 <BehaviorLayer name="behavior_layer1">
                   <BehaviorKeyframe name="keyframe1" index="1">
                     <Diagram>
-                      <Box name="Learn Face" id="3" localization="8" tooltip="Teach the robot a new face to recognize. the robot&apos;s eyes will become green in case of&#x0A;success and red in case of failure.&#x0A;&#x0A;V1.1.0&#x0A;" x="491" y="35">
+                      <Box name="Learn Face" id="3" localization="8" tooltip="Teach the robot a new face to recognize. the robot&apos;s eyes will become green in case of&#x0A;success and red in case of failure.&#x0A;&#x0A;V1.1.0&#x0A;" x="480" y="84">
                         <bitmap>media/images/box/interaction/learn_face.png</bitmap>
                         <script language="4">
                           <content>
@@ -580,6 +581,7 @@ class MyClass(GeneratedClass):
         return cursor.lastrowid
 
     def onLoad(self):
+        # Initiate connection
         self.conn = sqlite3.connect('robot_db', check_same_thread=False)
 
         # If table faces does not yet exist, create a new one
@@ -636,11 +638,58 @@ class MyClass(GeneratedClass):
                         <Input name="onSignal" type="1" type_size="1" nature="1" inner="0" tooltip="The signal that must pass only once." id="2" />
                         <Output name="firstTime" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent first time the onSignal input is stimulated." id="3" />
                       </Box>
+                      <Box name="deleteIdentity" id="1" localization="8" tooltip="Testing access to our database through choregraphe" x="697" y="101">
+                        <bitmap>media/images/box/box-python-script.png</bitmap>
+                        <script language="4">
+                          <content>
+                            <![CDATA[import sqlite3
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.conn = None
+
+    # will add new fae with unique id, default to
+    def delete_new_identity(self, id):
+        self.conn.execute("DELETE FROM preferenceTable WHERE user_id={};)".format(id))
+        self.conn.commit()
+
+    def onLoad(self):
+        # Initiate connection
+        self.conn = sqlite3.connect('robot_db', check_same_thread=False)
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        # Get id parameter
+        id = self.getParameter("id")
+
+        # remove new identity from the database
+        self.remove_new_identity(id)
+
+        self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+                          </content>
+                        </script>
+                        <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                        <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                        <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                        <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                        <Parameter name="id" inherits_from_parent="0" content_type="3" value="" default_value="" custom_choice="0" tooltip="" id="5" />
+                      </Box>
                       <Link inputowner="11" indexofinput="2" outputowner="13" indexofoutput="3" />
                       <Link inputowner="3" indexofinput="2" outputowner="11" indexofoutput="5" />
                       <Link inputowner="13" indexofinput="2" outputowner="0" indexofoutput="2" />
                       <Link inputowner="0" indexofinput="5" outputowner="11" indexofoutput="5" />
                       <Link inputowner="0" indexofinput="4" outputowner="3" indexofoutput="3" />
+                      <Link inputowner="1" indexofinput="2" outputowner="3" indexofoutput="4" />
+                      <Link inputowner="0" indexofinput="6" outputowner="1" indexofoutput="4" />
+                      <Link inputowner="1" indexofinput="5" outputowner="11" indexofoutput="5" />
                     </Diagram>
                   </BehaviorKeyframe>
                 </BehaviorLayer>
@@ -1602,7 +1651,7 @@ class MyClass(GeneratedClass):
                                         <Diagram />
                                       </BehaviorKeyframe>
                                     </BehaviorLayer>
-                                    <ActuatorList model="Nao">
+                                    <ActuatorList model="nao">
                                       <ActuatorCurve name="" actuator="LShoulderPitch" mute="0" unit="0">
                                         <Key frame="15" value="-58.4" />
                                         <Key frame="30" value="-58.4" />
@@ -2315,6 +2364,7 @@ class MyClass(GeneratedClass):
             <Link inputowner="7" indexofinput="7" outputowner="3" indexofoutput="7" />
             <Link inputowner="7" indexofinput="5" outputowner="3" indexofoutput="6" />
             <Link inputowner="4" indexofinput="2" outputowner="0" indexofoutput="2" />
+            <Link inputowner="4" indexofinput="2" outputowner="6" indexofoutput="6" />
           </Diagram>
         </BehaviorKeyframe>
       </BehaviorLayer>
