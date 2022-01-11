@@ -24,16 +24,15 @@
                 </content>
               </script>
               <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
-              <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="" id="2" />
-              <Input name="user_id" type="3" type_size="1" nature="1" inner="0" tooltip="" id="3" />
-              <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
-              <Output name="response" type="2" type_size="1" nature="2" inner="0" tooltip="" id="5" />
-              <Output name="userID" type="3" type_size="1" nature="2" inner="0" tooltip="" id="6" />
+              <Input name="user_id" type="3" type_size="1" nature="2" inner="0" tooltip="" id="2" />
+              <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
+              <Output name="response" type="2" type_size="1" nature="2" inner="0" tooltip="" id="4" />
+              <Output name="userID" type="3" type_size="1" nature="2" inner="0" tooltip="" id="5" />
               <Timeline enable="0">
                 <BehaviorLayer name="behavior_layer1">
                   <BehaviorKeyframe name="keyframe1" index="1">
-                    <Diagram>
-                      <Box name="getResponse" id="11" localization="8" tooltip="Testing access to our database through choregraphe" x="124" y="18">
+                    <Diagram scale="100">
+                      <Box name="getResponse" id="11" localization="8" tooltip="Testing access to our database through choregraphe" x="144" y="40">
                         <bitmap>media/images/box/box-python-script.png</bitmap>
                         <script language="4">
                           <content>
@@ -46,6 +45,7 @@ class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
         self.conn = None
+        self.user_id = -1
 
     # will add new face with unique id, default to
     def get_response(self, user_id):
@@ -74,23 +74,31 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
-        # Retrieve ID parameter
-        user_id = self.getParameter("userID")
-
-        # Retrieve epsilon parameter from database
-        epsilon = self.get_epsilon(user_id)
-
-        # Choose exploitation vs exploration
+        self.logger.info("reached!")
+        # In case the user input does not come through for some reason perform a random response
         response = 1
-        if np.random.uniform(0, 1) < epsilon:
-            # Explore: choose random response
-            response = np.random.randint(0, 5)
+        if self.user_id < 0:
+            response = np.random.randint(1, 5)
+            self.logger.info("no user given")
         else:
-            # Exploit: choose response with known highest reward
-            response = self.get_response(user_id)
+            # Retrieve epsilon parameter from database
+            epsilon = self.get_epsilon(self.user_id)
+
+            # Choose exploitation vs exploration
+            if np.random.uniform(0, 1) < epsilon:
+                # Explore: choose random response
+                response = np.random.randint(1, 5)
+            else:
+                # Exploit: choose response with known highest reward
+                response = self.get_response(self.user_id)
 
         # Return that preference
         self.response(response)
+
+    def onInput_onUserID(self, user_id):
+        self.logger.info("test")
+        self.user_id = user_id
+        self.onInput_onStart()
 
     def onInput_onStop(self):
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
@@ -99,9 +107,10 @@ class MyClass(GeneratedClass):
                         </script>
                         <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                         <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="" id="2" />
-                        <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
-                        <Output name="response" type="2" type_size="1" nature="2" inner="0" tooltip="" id="4" />
-                        <Parameter name="user_id" inherits_from_parent="0" content_type="3" value="" default_value="" custom_choice="0" tooltip="" id="5" />
+                        <Input name="onUserID" type="3" type_size="1" nature="1" inner="0" tooltip="" id="3" />
+                        <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                        <Output name="response" type="2" type_size="1" nature="2" inner="0" tooltip="" id="5" />
+                        <Parameter name="user_id" inherits_from_parent="0" content_type="3" value="" default_value="" custom_choice="0" tooltip="" id="6" />
                       </Box>
                       <Box name="Kisses" id="1" localization="8" tooltip="This box is empty and should be used to create any box diagram you would like.&#x0A;&#x0A;To edit its diagram, double-click on it." x="688" y="216">
                         <bitmap>media/images/box/box-diagram.png</bitmap>
@@ -380,108 +389,112 @@ class MyClass(GeneratedClass):
                                     </BehaviorLayer>
                                     <ActuatorList model="nao">
                                       <ActuatorCurve name="value" actuator="HeadPitch" mute="0" unit="0">
-                                        <Key frame="25" value="32.957" />
-                                        <Key frame="40" value="-3.4" />
+                                        <Key frame="10" value="-3.4" />
+                                        <Key frame="20" value="-3.4" />
+                                        <Key frame="30" value="29.5" />
+                                        <Key frame="40" value="-3.3" />
+                                        <Key frame="50" value="-3.4" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="HeadYaw" mute="0" unit="0">
-                                        <Key frame="25" value="3.77694" />
-                                        <Key frame="40" value="3.77694" />
+                                        <Key frame="10" value="3.77694" />
+                                        <Key frame="20" value="3.77694" />
+                                        <Key frame="50" value="3.77694" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="LAnklePitch" mute="0" unit="0">
-                                        <Key frame="25" value="-5.18802" />
-                                        <Key frame="40" value="-5.18802" />
+                                        <Key frame="10" value="-5.18802" />
+                                        <Key frame="50" value="-5.18802" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="LAnkleRoll" mute="0" unit="0">
-                                        <Key frame="25" value="-12.654" />
-                                        <Key frame="40" value="-12.654" />
+                                        <Key frame="10" value="-12.654" />
+                                        <Key frame="50" value="-12.654" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="" actuator="LElbowRoll" mute="0" unit="0">
-                                        <Key frame="25" value="-76.5513" />
-                                        <Key frame="40" value="-76.5513" />
+                                        <Key frame="10" value="-76.5513" />
+                                        <Key frame="50" value="-76.5513" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="" actuator="LElbowYaw" mute="0" unit="0">
-                                        <Key frame="25" value="-6.94585" />
-                                        <Key frame="40" value="-6.94585" />
+                                        <Key frame="10" value="-6.94585" />
+                                        <Key frame="50" value="-6.94585" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="" actuator="LHand" mute="0" unit="1">
-                                        <Key frame="25" value="0.0616" />
-                                        <Key frame="40" value="0.0616" />
+                                        <Key frame="10" value="0.0616" />
+                                        <Key frame="50" value="0.0616" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="LHipPitch" mute="0" unit="0">
-                                        <Key frame="25" value="8.44001" />
-                                        <Key frame="40" value="8.44001" />
+                                        <Key frame="10" value="8.44001" />
+                                        <Key frame="50" value="8.44001" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="LHipRoll" mute="0" unit="0">
-                                        <Key frame="25" value="10.6373" />
-                                        <Key frame="40" value="10.6373" />
+                                        <Key frame="10" value="10.6373" />
+                                        <Key frame="50" value="10.6373" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="LHipYawPitch" mute="0" unit="0">
-                                        <Key frame="25" value="-8.4352" />
-                                        <Key frame="40" value="-8.4352" />
+                                        <Key frame="10" value="-8.4352" />
+                                        <Key frame="50" value="-8.4352" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="LKneePitch" mute="0" unit="0">
-                                        <Key frame="25" value="-2.02391" />
-                                        <Key frame="40" value="-2.02391" />
+                                        <Key frame="10" value="-2.02391" />
+                                        <Key frame="50" value="-2.02391" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="" actuator="LShoulderPitch" mute="0" unit="0">
-                                        <Key frame="25" value="31.5507" />
-                                        <Key frame="40" value="31.5507" />
+                                        <Key frame="10" value="31.5507" />
+                                        <Key frame="50" value="31.5507" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="" actuator="LShoulderRoll" mute="0" unit="0">
-                                        <Key frame="25" value="12.654" />
-                                        <Key frame="40" value="12.654" />
+                                        <Key frame="10" value="12.654" />
+                                        <Key frame="50" value="12.654" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="" actuator="LWristYaw" mute="0" unit="0">
-                                        <Key frame="25" value="-68.3822" />
-                                        <Key frame="40" value="-68.3822" />
+                                        <Key frame="10" value="-68.3822" />
+                                        <Key frame="50" value="-68.3822" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="RAnklePitch" mute="0" unit="0">
-                                        <Key frame="25" value="7.91266" />
-                                        <Key frame="40" value="7.91266" />
+                                        <Key frame="10" value="7.91266" />
+                                        <Key frame="50" value="7.91266" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="RAnkleRoll" mute="0" unit="0">
-                                        <Key frame="25" value="16.1745" />
-                                        <Key frame="40" value="16.1745" />
+                                        <Key frame="10" value="16.1745" />
+                                        <Key frame="50" value="16.1745" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="" actuator="RElbowRoll" mute="0" unit="0">
-                                        <Key frame="25" value="80.8628" />
-                                        <Key frame="40" value="80.8628" />
+                                        <Key frame="10" value="80.8628" />
+                                        <Key frame="50" value="80.8628" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="" actuator="RElbowYaw" mute="0" unit="0">
-                                        <Key frame="25" value="-2.1997" />
-                                        <Key frame="40" value="-2.1997" />
+                                        <Key frame="10" value="-2.1997" />
+                                        <Key frame="50" value="-2.1997" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="RHand" mute="0" unit="1">
-                                        <Key frame="25" value="0.284" />
-                                        <Key frame="40" value="0.284" />
+                                        <Key frame="10" value="0.284" />
+                                        <Key frame="50" value="0.284" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="RHipPitch" mute="0" unit="0">
-                                        <Key frame="25" value="-4.39699" />
-                                        <Key frame="40" value="-4.39699" />
+                                        <Key frame="10" value="-4.39699" />
+                                        <Key frame="50" value="-4.39699" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="" actuator="RHipRoll" mute="0" unit="0">
-                                        <Key frame="25" value="-15.4665" />
-                                        <Key frame="40" value="-15.4665" />
+                                        <Key frame="10" value="-15.4665" />
+                                        <Key frame="50" value="-15.4665" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="RHipYawPitch" mute="0" unit="0">
-                                        <Key frame="25" value="-8.4352" />
-                                        <Key frame="40" value="-8.4352" />
+                                        <Key frame="10" value="-8.4352" />
+                                        <Key frame="50" value="-8.4352" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="RKneePitch" mute="0" unit="0">
-                                        <Key frame="25" value="-2.107" />
-                                        <Key frame="40" value="-2.107" />
+                                        <Key frame="10" value="-2.107" />
+                                        <Key frame="50" value="-2.107" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="" actuator="RShoulderPitch" mute="0" unit="0">
-                                        <Key frame="25" value="20.3933" />
-                                        <Key frame="40" value="20.3933" />
+                                        <Key frame="10" value="20.3933" />
+                                        <Key frame="50" value="20.3933" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="RShoulderRoll" mute="0" unit="0">
-                                        <Key frame="25" value="-13.9772" />
-                                        <Key frame="40" value="-13.9772" />
+                                        <Key frame="10" value="-13.9772" />
+                                        <Key frame="50" value="-13.9772" />
                                       </ActuatorCurve>
                                       <ActuatorCurve name="value" actuator="RWristYaw" mute="0" unit="0">
-                                        <Key frame="25" value="6.58948" />
-                                        <Key frame="40" value="6.58948" />
+                                        <Key frame="10" value="79.3" />
+                                        <Key frame="50" value="79.3" />
                                       </ActuatorCurve>
                                     </ActuatorList>
                                   </Timeline>
@@ -910,7 +923,7 @@ class MyClass(GeneratedClass):
                           </BehaviorLayer>
                         </Timeline>
                       </Box>
-                      <Box name="Switch Case" id="6" localization="8" tooltip="Test input value and stimulate the output matching to this value. If there is no&#x0A;matching output, the default output (onDefault) is stimulated.&#x0A;&#x0A;You can edit a case by left double-clicking on the line. You can add a&#x0A;case by right clicking on a line and selecting &apos;Insert a row&apos;. You can delete&#x0A;a case by right clicking on a line and selecting &apos;Remove a row&apos;." plugin="dispatcher_plugin" x="317" y="90">
+                      <Box name="Switch Case" id="6" localization="8" tooltip="Test input value and stimulate the output matching to this value. If there is no&#x0A;matching output, the default output (onDefault) is stimulated.&#x0A;&#x0A;You can edit a case by left double-clicking on the line. You can add a&#x0A;case by right clicking on a line and selecting &apos;Insert a row&apos;. You can delete&#x0A;a case by right clicking on a line and selecting &apos;Remove a row&apos;." plugin="dispatcher_plugin" x="376" y="88">
                         <bitmap>media/images/box/interaction/choice.png</bitmap>
                         <script language="4">
                           <content>
@@ -1095,23 +1108,102 @@ class MyClass(GeneratedClass):
                         <Resource name="Standing" type="Lock" timeout="1" />
                         <Resource name="All motors" type="Lock" timeout="1" />
                       </Box>
-                      <Link inputowner="6" indexofinput="2" outputowner="11" indexofoutput="4" />
+                      <Box name="Say Text" id="7" localization="8" tooltip="Say the text received on its input." x="1193" y="121">
+                        <bitmap>media/images/box/interaction/say.png</bitmap>
+                        <script language="4">
+                          <content>
+                            <![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.tts = self.session().service('ALTextToSpeech')
+        self.ttsStop = self.session().service('ALTextToSpeech') #Create another service as wait is blocking if audioout is remote
+        self.bIsRunning = False
+        self.ids = []
+
+    def onUnload(self):
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        while( self.bIsRunning ):
+            time.sleep( 0.2 )
+
+    def onInput_onStart(self, p):
+        self.bIsRunning = True
+        try:
+            sentence = "\RSPD="+ str( self.getParameter("Speed (%)") ) + "\ "
+            sentence += "\VCT="+ str( self.getParameter("Voice shaping (%)") ) + "\ "
+            sentence += str(p)
+            sentence +=  "\RST\ "
+            id = self.tts.pCall("say",str(sentence))
+            self.ids.append(id)
+            self.tts.wait(id)
+        finally:
+            try:
+                self.ids.remove(id)
+            except:
+                pass
+            if( self.ids == [] ):
+                self.onStopped() # activate output of the box
+                self.bIsRunning = False
+
+    def onInput_onStop(self):
+        self.onUnload()]]>
+                          </content>
+                        </script>
+                        <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" />
+                        <Input name="onStart" type="3" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this Input." id="2" />
+                        <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this Input." id="3" />
+                        <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when Box behavior is finished." id="4" />
+                        <Parameter name="Voice shaping (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="150" tooltip='Used to modify at runtime the voice feature (tone, speed). In a slighty&#x0A;different way than pitch and speed, it gives a kind of &quot;gender or age&#x0A;modification&quot; effect.&#x0A;&#x0A;For instance, a quite good male derivation of female voice can be&#x0A;obtained setting this parameter to 78%.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the&#x0A;speed parameter. For example, if you want to decrease by 20% the voice&#x0A;shaping, you will have to increase by 20% the speed to keep a constant&#x0A;average speed.' id="5" />
+                        <Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" />
+                        <Resource name="Speech" type="Lock" timeout="0" />
+                      </Box>
+                      <Box name="Text Edit" id="8" localization="8" tooltip="Send the text you entered when the input is stimulated." plugin="textedit_plugin" x="937" y="136">
+                        <bitmap>media/images/box/interaction/vocabulary.png</bitmap>
+                        <script language="4">
+                          <content>
+                            <![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		GeneratedClass.__init__(self)
+
+	def onInput_onStart(self):
+		self.onStopped("Did you like this?")]]>
+                          </content>
+                        </script>
+                        <pluginContent>
+                          <text>
+                            <![CDATA[Did you like this?]]>
+                          </text>
+                        </pluginContent>
+                        <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" />
+                        <Input name="onStart" type="1" type_size="1" nature="1" inner="0" tooltip="To send the text on the output." id="2" />
+                        <Output name="onStopped" type="3" type_size="1" nature="2" inner="0" tooltip="The text you entered." id="3" />
+                      </Box>
+                      <Link inputowner="6" indexofinput="2" outputowner="11" indexofoutput="5" />
                       <Link inputowner="5" indexofinput="2" outputowner="6" indexofoutput="8" />
                       <Link inputowner="4" indexofinput="2" outputowner="6" indexofoutput="7" />
                       <Link inputowner="3" indexofinput="2" outputowner="6" indexofoutput="6" />
                       <Link inputowner="2" indexofinput="2" outputowner="6" indexofoutput="5" />
                       <Link inputowner="1" indexofinput="2" outputowner="6" indexofoutput="4" />
-                      <Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" />
-                      <Link inputowner="0" indexofinput="4" outputowner="3" indexofoutput="4" />
-                      <Link inputowner="0" indexofinput="4" outputowner="2" indexofoutput="4" />
-                      <Link inputowner="0" indexofinput="4" outputowner="4" indexofoutput="4" />
-                      <Link inputowner="0" indexofinput="4" outputowner="5" indexofoutput="4" />
-                      <Link inputowner="0" indexofinput="5" outputowner="11" indexofoutput="4" />
+                      <Link inputowner="0" indexofinput="4" outputowner="11" indexofoutput="5" />
                       <Link inputowner="14" indexofinput="2" outputowner="6" indexofoutput="3" />
-                      <Link inputowner="0" indexofinput="4" outputowner="14" indexofoutput="4" />
-                      <Link inputowner="11" indexofinput="2" outputowner="0" indexofoutput="2" />
-                      <Link inputowner="11" indexofinput="5" outputowner="0" indexofoutput="3" />
-                      <Link inputowner="0" indexofinput="6" outputowner="0" indexofoutput="3" />
+                      <Link inputowner="0" indexofinput="5" outputowner="0" indexofoutput="2" />
+                      <Link inputowner="11" indexofinput="3" outputowner="0" indexofoutput="2" />
+                      <Link inputowner="0" indexofinput="3" outputowner="7" indexofoutput="4" />
+                      <Link inputowner="8" indexofinput="2" outputowner="14" indexofoutput="4" />
+                      <Link inputowner="8" indexofinput="2" outputowner="1" indexofoutput="4" />
+                      <Link inputowner="8" indexofinput="2" outputowner="2" indexofoutput="4" />
+                      <Link inputowner="8" indexofinput="2" outputowner="3" indexofoutput="4" />
+                      <Link inputowner="8" indexofinput="2" outputowner="4" indexofoutput="4" />
+                      <Link inputowner="8" indexofinput="2" outputowner="5" indexofoutput="4" />
+                      <Link inputowner="7" indexofinput="2" outputowner="8" indexofoutput="3" />
                     </Diagram>
                   </BehaviorKeyframe>
                 </BehaviorLayer>
@@ -1157,7 +1249,7 @@ class MyClass(GeneratedClass):
               <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="To send the number on the output." id="2" />
               <Output name="onStopped" type="2" type_size="1" nature="2" inner="0" tooltip="The number you entered." id="3" />
             </Box>
-            <Box name="updatePreferences" id="7" localization="8" tooltip="Testing access to our database through choregraphe" x="1310" y="38">
+            <Box name="updatePreferences" id="7" localization="8" tooltip="Testing access to our database through choregraphe" x="1422" y="42">
               <bitmap>media/images/box/box-python-script.png</bitmap>
               <script language="4">
                 <content>
@@ -1186,7 +1278,7 @@ class MyClass(GeneratedClass):
         new_response_value = self.get_response_value(user_id, performed_response) + self.lr * reward
 
         # Update in Database
-        self.conn.execute("UPDATE preferenceTable SET response" + performed_response + "="+ str(reward) +" WHERE user_id=" + user_id)
+        self.conn.execute("UPDATE preferenceTable SET response" + performed_response + "="+ str(new_response_value) +" WHERE user_id=" + user_id)
         self.conn.commit()
 
     def onLoad(self):
@@ -1203,20 +1295,26 @@ class MyClass(GeneratedClass):
         performed_response = self.getParameter("performedResponse")
         reward = self.getParameter("reward")
 
-        # Update preference value
-        self.update_preference(user_id, str(performed_response), reward)
+        if not user_id < 0:
+            # Update preference value
+            self.update_preference(user_id, str(performed_response), reward)
 
-        # Print new preferences
-        self.print_preferences(user_id)
+            # Print new preferences
+            self.print_preferences(user_id)
 
-        # Get epsilon
-        epsilon = self.get_epsilon(user_id)
-        self.logger.info("Current epsilon value:"+str(epsilon))
+            # Get epsilon
+            epsilon = self.get_epsilon(user_id)
+            self.logger.info("Current epsilon value:"+str(epsilon))
 
-        # Update epsilon, always keep a 0.1 chance of exploring
-        if epsilon > 0.1:
-            epsilon = float(epsilon) - 0.1
-            self.set_epsilon(user_id, str(epsilon))
+            # Update epsilon, always keep a 0.1 chance of exploring
+            if epsilon > 0.1:
+                epsilon = float(epsilon) - 0.1
+                self.set_epsilon(user_id, str(epsilon))
+
+            # Stop
+            self.onStopped()
+        else:
+            self.logger.info("Did not save to preferences -> user unknown")
 
     # will add new face with unique id, default to
     def print_preferences(self, user_id):
@@ -1247,7 +1345,7 @@ class MyClass(GeneratedClass):
               <Parameter name="reward" inherits_from_parent="0" content_type="1" value="0" default_value="0" min="0" max="1" tooltip="" id="5" />
               <Parameter name="user_id" inherits_from_parent="0" content_type="3" value="1" default_value='&quot;0&quot;' custom_choice="0" tooltip="" id="6" />
             </Box>
-            <Box name="Delete Database" id="16" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="261" y="445">
+            <Box name="Delete Database" id="16" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="1331" y="539">
               <bitmap>media/images/box/box-python-script.png</bitmap>
               <script language="4">
                 <content>
@@ -1357,7 +1455,7 @@ class MyClass(GeneratedClass):
               </Timeline>
               <Resource name="All motors" type="Lock" timeout="0" />
             </Box>
-            <Box name="Unlearn All Faces" id="18" localization="8" tooltip="Remove all faces from the face database.&#x0A;&#x0A;V1.1.0&#x0A;" x="112" y="447">
+            <Box name="Unlearn All Faces" id="18" localization="8" tooltip="Remove all faces from the face database.&#x0A;&#x0A;V1.1.0&#x0A;" x="1182" y="541">
               <bitmap>media/images/box/interaction/unlearn_all_faces.png</bitmap>
               <script language="4">
                 <content>
@@ -1408,7 +1506,7 @@ class MyClass(GeneratedClass):
                 <BehaviorLayer name="behavior_layer1">
                   <BehaviorKeyframe name="keyframe1" index="1">
                     <Diagram>
-                      <Box name="Face Reco." id="4" localization="8" tooltip="Detect people&apos;s face and recognize those which are known by the robot.&#x0A;&#x0A;Note: the robot needs to learn a face with the Learn Face box before he can recognize it." x="168" y="104">
+                      <Box name="Face Reco." id="4" localization="8" tooltip="Detect people&apos;s face and recognize those which are known by the robot.&#x0A;&#x0A;Note: the robot needs to learn a face with the Learn Face box before he can recognize it." x="264" y="91">
                         <bitmap>media/images/box/interaction/reco_face.png</bitmap>
                         <script language="4">
                           <content>
@@ -1493,7 +1591,7 @@ class MyClass(GeneratedClass):
                           </BehaviorLayer>
                         </Timeline>
                       </Box>
-                      <Box name="learnFace" id="6" localization="8" tooltip="This box is empty and should be used to create any box diagram you would like.&#x0A;&#x0A;To edit its diagram, double-click on it." x="449" y="241">
+                      <Box name="learnFace" id="6" localization="8" tooltip="This box is empty and should be used to create any box diagram you would like.&#x0A;&#x0A;To edit its diagram, double-click on it." x="671" y="238">
                         <bitmap>media/images/box/box-diagram.png</bitmap>
                         <script language="4">
                           <content>
@@ -2165,7 +2263,7 @@ class MyClass(GeneratedClass):
                           </BehaviorLayer>
                         </Timeline>
                       </Box>
-                      <Box name="Say Text" id="8" localization="8" tooltip="Say the text received on its input." x="620" y="10">
+                      <Box name="Say Text" id="8" localization="8" tooltip="Say the text received on its input." x="842" y="7">
                         <bitmap>media/images/box/interaction/say.png</bitmap>
                         <script language="4">
                           <content>
@@ -2221,7 +2319,7 @@ class MyClass(GeneratedClass):
                         <Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" />
                         <Resource name="Speech" type="Lock" timeout="0" />
                       </Box>
-                      <Box name="Text Edit" id="9" localization="8" tooltip="Send the text you entered when the input is stimulated." plugin="textedit_plugin" x="351" y="26">
+                      <Box name="Text Edit" id="9" localization="8" tooltip="Send the text you entered when the input is stimulated." plugin="textedit_plugin" x="588" y="21">
                         <bitmap>media/images/box/interaction/vocabulary.png</bitmap>
                         <script language="4">
                           <content>
@@ -2243,15 +2341,186 @@ class MyClass(GeneratedClass):
                         <Input name="onStart" type="1" type_size="1" nature="1" inner="0" tooltip="To send the text on the output." id="2" />
                         <Output name="onStopped" type="3" type_size="1" nature="2" inner="0" tooltip="The text you entered." id="3" />
                       </Box>
+                      <Box name="Only Once" id="1" localization="8" tooltip="This box&apos;s output is stimulated only the first time the onSignal input is.&#x0A;&#x0A;Note: It is reset when the diagram containing the box is unloaded." x="529" y="156">
+                        <bitmap>media/images/box/loop.png</bitmap>
+                        <script language="4">
+                          <content>
+                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.bFirstTime = True
+
+    def onUnload(self):
+        self.bFirstTime = True
+
+    def onInput_onSignal(self):
+        if( self.bFirstTime ):
+            self.bFirstTime = False
+            self.firstTime()]]>
+                          </content>
+                        </script>
+                        <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                        <Input name="onSignal" type="1" type_size="1" nature="1" inner="0" tooltip="The signal that must pass only once." id="2" />
+                        <Output name="firstTime" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent first time the onSignal input is stimulated." id="3" />
+                      </Box>
+                      <Box name="Store Variable" id="2" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="1182" y="27">
+                        <bitmap>media/images/box/box-python-script.png</bitmap>
+                        <script language="4">
+                          <content>
+                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.data = None
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onData(self, data):
+        self.data = data
+
+    def onInput_onStart(self):
+        self.outputData(self.data)
+        self.onInput_onStop()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box
+
+    def onInput_setData(self, p):
+        pass]]>
+                          </content>
+                        </script>
+                        <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                        <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                        <Input name="onData" type="3" type_size="1" nature="1" inner="0" tooltip="" id="3" />
+                        <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="4" />
+                        <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="5" />
+                        <Output name="outputData" type="3" type_size="1" nature="2" inner="0" tooltip="" id="6" />
+                      </Box>
+                      <Box name="Say Text (1)" id="3" localization="8" tooltip="Say the text received on its input." x="366" y="368">
+                        <bitmap>media/images/box/interaction/say.png</bitmap>
+                        <script language="4">
+                          <content>
+                            <![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.tts = self.session().service('ALTextToSpeech')
+        self.ttsStop = self.session().service('ALTextToSpeech') #Create another service as wait is blocking if audioout is remote
+        self.bIsRunning = False
+        self.ids = []
+
+    def onUnload(self):
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        while( self.bIsRunning ):
+            time.sleep( 0.2 )
+
+    def onInput_onStart(self, p):
+        self.bIsRunning = True
+        try:
+            sentence = "\RSPD="+ str( self.getParameter("Speed (%)") ) + "\ "
+            sentence += "\VCT="+ str( self.getParameter("Voice shaping (%)") ) + "\ "
+            sentence += str(p)
+            sentence +=  "\RST\ "
+            id = self.tts.pCall("say",str(sentence))
+            self.ids.append(id)
+            self.tts.wait(id)
+        finally:
+            try:
+                self.ids.remove(id)
+            except:
+                pass
+            if( self.ids == [] ):
+                self.onStopped() # activate output of the box
+                self.bIsRunning = False
+
+    def onInput_onStop(self):
+        self.onUnload()]]>
+                          </content>
+                        </script>
+                        <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" />
+                        <Input name="onStart" type="3" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this Input." id="2" />
+                        <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this Input." id="3" />
+                        <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when Box behavior is finished." id="4" />
+                        <Parameter name="Voice shaping (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="150" tooltip='Used to modify at runtime the voice feature (tone, speed). In a slighty&#x0A;different way than pitch and speed, it gives a kind of &quot;gender or age&#x0A;modification&quot; effect.&#x0A;&#x0A;For instance, a quite good male derivation of female voice can be&#x0A;obtained setting this parameter to 78%.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the&#x0A;speed parameter. For example, if you want to decrease by 20% the voice&#x0A;shaping, you will have to increase by 20% the speed to keep a constant&#x0A;average speed.' id="5" />
+                        <Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" />
+                        <Resource name="Speech" type="Lock" timeout="0" />
+                      </Box>
+                      <Box name="Text Edit (1)" id="5" localization="8" tooltip="Send the text you entered when the input is stimulated." plugin="textedit_plugin" x="112" y="382">
+                        <bitmap>media/images/box/interaction/vocabulary.png</bitmap>
+                        <script language="4">
+                          <content>
+                            <![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		GeneratedClass.__init__(self)
+
+	def onInput_onStart(self):
+		self.onStopped("Somebody there?")]]>
+                          </content>
+                        </script>
+                        <pluginContent>
+                          <text>
+                            <![CDATA[Somebody there?]]>
+                          </text>
+                        </pluginContent>
+                        <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" />
+                        <Input name="onStart" type="1" type_size="1" nature="1" inner="0" tooltip="To send the text on the output." id="2" />
+                        <Output name="onStopped" type="3" type_size="1" nature="2" inner="0" tooltip="The text you entered." id="3" />
+                      </Box>
+                      <Box name="Only Once (1)" id="7" localization="8" tooltip="This box&apos;s output is stimulated only the first time the onSignal input is.&#x0A;&#x0A;Note: It is reset when the diagram containing the box is unloaded." x="429" y="24">
+                        <bitmap>media/images/box/loop.png</bitmap>
+                        <script language="4">
+                          <content>
+                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.bFirstTime = True
+
+    def onUnload(self):
+        self.bFirstTime = True
+
+    def onInput_onSignal(self):
+        if( self.bFirstTime ):
+            self.bFirstTime = False
+            self.firstTime()]]>
+                          </content>
+                        </script>
+                        <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                        <Input name="onSignal" type="1" type_size="1" nature="1" inner="0" tooltip="The signal that must pass only once." id="2" />
+                        <Output name="firstTime" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent first time the onSignal input is stimulated." id="3" />
+                      </Box>
                       <Link inputowner="8" indexofinput="2" outputowner="9" indexofoutput="3" />
-                      <Link inputowner="4" indexofinput="2" outputowner="0" indexofoutput="2" />
-                      <Link inputowner="6" indexofinput="2" outputowner="4" indexofoutput="7" />
-                      <Link inputowner="0" indexofinput="4" outputowner="4" indexofoutput="6" />
-                      <Link inputowner="9" indexofinput="2" outputowner="4" indexofoutput="6" />
                       <Link inputowner="4" indexofinput="2" outputowner="6" indexofoutput="6" />
-                      <Link inputowner="0" indexofinput="3" outputowner="4" indexofoutput="6" />
-                      <Link inputowner="0" indexofinput="3" outputowner="6" indexofoutput="4" />
-                      <Link inputowner="0" indexofinput="4" outputowner="6" indexofoutput="5" />
+                      <Link inputowner="1" indexofinput="2" outputowner="4" indexofoutput="7" />
+                      <Link inputowner="6" indexofinput="2" outputowner="1" indexofoutput="3" />
+                      <Link inputowner="2" indexofinput="2" outputowner="8" indexofoutput="4" />
+                      <Link inputowner="2" indexofinput="3" outputowner="4" indexofoutput="6" />
+                      <Link inputowner="0" indexofinput="3" outputowner="2" indexofoutput="5" />
+                      <Link inputowner="0" indexofinput="4" outputowner="2" indexofoutput="6" />
+                      <Link inputowner="2" indexofinput="2" outputowner="6" indexofoutput="4" />
+                      <Link inputowner="2" indexofinput="3" outputowner="6" indexofoutput="5" />
+                      <Link inputowner="3" indexofinput="2" outputowner="5" indexofoutput="3" />
+                      <Link inputowner="4" indexofinput="2" outputowner="3" indexofoutput="4" />
+                      <Link inputowner="5" indexofinput="2" outputowner="0" indexofoutput="2" />
+                      <Link inputowner="9" indexofinput="2" outputowner="7" indexofoutput="3" />
+                      <Link inputowner="7" indexofinput="2" outputowner="4" indexofoutput="6" />
                     </Diagram>
                   </BehaviorKeyframe>
                 </BehaviorLayer>
@@ -3174,7 +3443,7 @@ class MyClass(GeneratedClass):
                 </content>
               </script>
               <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
-              <Input name="onResponsePerformed" type="1" type_size="1" nature="1" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+              <Input name="onResponsePerformed" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
               <Input name="onPositiveFeedback" type="1" type_size="1" nature="1" inner="0" tooltip="" id="3" />
               <Input name="onNegativeFeedback" type="1" type_size="1" nature="1" inner="0" tooltip="" id="4" />
               <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="5" />
@@ -3389,8 +3658,8 @@ class MyClass(GeneratedClass):
             </Box>
             <Link inputowner="7" indexofinput="5" outputowner="13" indexofoutput="3" />
             <Link inputowner="7" indexofinput="5" outputowner="14" indexofoutput="3" />
-            <Link inputowner="7" indexofinput="6" outputowner="3" indexofoutput="6" />
-            <Link inputowner="7" indexofinput="4" outputowner="3" indexofoutput="5" />
+            <Link inputowner="7" indexofinput="6" outputowner="3" indexofoutput="5" />
+            <Link inputowner="7" indexofinput="4" outputowner="3" indexofoutput="4" />
             <Link inputowner="17" indexofinput="2" outputowner="0" indexofoutput="2" />
             <Link inputowner="16" indexofinput="2" outputowner="18" indexofoutput="3" />
             <Link inputowner="24" indexofinput="2" outputowner="25" indexofoutput="3" />
@@ -3400,14 +3669,14 @@ class MyClass(GeneratedClass):
             <Link inputowner="21" indexofinput="3" outputowner="22" indexofoutput="7" />
             <Link inputowner="23" indexofinput="2" outputowner="21" indexofoutput="4" />
             <Link inputowner="21" indexofinput="2" outputowner="23" indexofoutput="6" />
-            <Link inputowner="3" indexofinput="3" outputowner="2" indexofoutput="4" />
-            <Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" />
             <Link inputowner="2" indexofinput="2" outputowner="7" indexofoutput="3" />
-            <Link inputowner="4" indexofinput="2" outputowner="3" indexofoutput="4" />
+            <Link inputowner="4" indexofinput="2" outputowner="3" indexofoutput="3" />
             <Link inputowner="4" indexofinput="4" outputowner="14" indexofoutput="3" />
             <Link inputowner="4" indexofinput="3" outputowner="13" indexofoutput="3" />
             <Link inputowner="7" indexofinput="2" outputowner="4" indexofoutput="5" />
-            <Link inputowner="3" indexofinput="2" outputowner="2" indexofoutput="3" />
+            <Link inputowner="3" indexofinput="2" outputowner="2" indexofoutput="4" />
+            <Link inputowner="0" indexofinput="5" outputowner="16" indexofoutput="4" />
+            <Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" />
           </Diagram>
         </BehaviorKeyframe>
       </BehaviorLayer>
